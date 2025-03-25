@@ -1,4 +1,4 @@
-import { usuarios, agregarUsuario, eliminarUsuario } from './datos.js';
+import { usuarios, agregarUsuario, eliminarUsuario } from './almacenaje.js';
 
 // Mostrar los usuarios en la tabla
 function mostrarUsuarios() {

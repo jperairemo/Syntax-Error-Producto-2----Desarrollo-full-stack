@@ -1,4 +1,4 @@
-import { voluntariados, agregarVoluntariado, eliminarVoluntariado } from './datos.js';
+import { voluntariados, agregarVoluntariado, eliminarVoluntariado } from './almacenaje.js';
 
 // Función para mostrar los voluntariados en la tabla
 function mostrarVoluntariados() {

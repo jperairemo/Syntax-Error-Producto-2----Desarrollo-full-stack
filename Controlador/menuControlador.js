@@ -1,7 +1,7 @@
 // controlador/menuControlador.js
 
 // Importamos funciones del modelo para obtener el usuario activo y cerrar sesión
-import { obtenerUsuarioActivo, cerrarSesion } from "../Modelo/datos.js";
+import { obtenerUsuarioActivo, cerrarSesion } from "../Modelo/almacenaje.js";
 
 // Importamos funciones de la vista para mostrar el menú según si hay login o no
 import { mostrarMenuLogin, mostrarMenuUsuario } from "../Vista/menuVista.js";
@@ -19,7 +19,7 @@ function iniciarMenu() {
     if (btnCerrar) {
       btnCerrar.addEventListener("click", () => {
         cerrarSesion(); // Borra el usuario activo del almacenamiento
-        location.href = "inicioSesion.html"; // Redirige al login
+        location.href = "login.html"; // Redirige al login
       });
     }
   } else {

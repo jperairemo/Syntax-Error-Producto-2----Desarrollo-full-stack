@@ -1,4 +1,4 @@
-// modelo/datos.js
+// modelo/almacenaje.js
 
 // IndexedDB config pàra voluntariados
 // --------------------------- Usuarios (WebStorage) ---------------------------
@@ -34,9 +34,9 @@ export function guardarUsuario(usuario) {
 // Obtener todos los usuarios
 // Devuelve un array con los usuarios existentes, o un array vacío si no hay ninguno.
 export function obtenerUsuarios() {
-  const datos = localStorage.getItem(USUARIOS_KEY);
-  if (datos != null) {
-    return JSON.parse(datos); // Convertimos de texto a array de objetos
+  const almacenaje = localStorage.getItem(USUARIOS_KEY);
+  if (almacenaje != null) {
+    return JSON.parse(almacenaje); // Convertimos de texto a array de objetos
   } else {
     return []; // Si no hay usuarios guardados
   }

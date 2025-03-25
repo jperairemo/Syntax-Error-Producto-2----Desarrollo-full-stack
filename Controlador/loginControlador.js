@@ -1,7 +1,7 @@
 // controlador/loginControlador.js
 
 // Importa la función que permite validar el usuario desde el modelo de datos
-import { loguearUsuario } from "../Modelo/datos.js";
+import { loguearUsuario } from "../Modelo/almacenaje.js";
 
 // Función que se ejecuta cuando se envía el formulario de login
 function Loguear(event) {

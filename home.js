@@ -1,4 +1,4 @@
-import { obtenerVoluntariados } from './datos.js';
+import { obtenerVoluntariados } from './almacenaje.js';
 
 const voluntariados = [
     {
@@ -28,7 +28,7 @@ function mostrarVoluntariados() {
     let container = document.getElementById("voluntariadosContainer");
     container.innerHTML = ""; // Limpiar antes de cargar
 
-    let voluntariados = obtenerVoluntariados(); // Obtener los voluntariados desde datos.js
+    let voluntariados = obtenerVoluntariados(); // Obtener los voluntariados desde almacenaje.js
 
     voluntariados.forEach(voluntariado => {
         let card = document.createElement("div");

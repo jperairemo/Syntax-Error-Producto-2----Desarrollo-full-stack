@@ -1,4 +1,4 @@
-// controlador/voluntariadosControlador.js
+// controlador/int_3_voluntariados.js
 
 // Importamos la clase Voluntariado (modelo de datos)
 import { Voluntariado } from "../Modelo/Voluntariado.js";
@@ -9,7 +9,7 @@ import {
     obtenerVoluntariados,
     guardarVoluntariado,
     eliminarVoluntariado
-} from "../Modelo/datos.js";
+} from "../Modelo/almacenaje.js";
 
 // -------------------------------
 // FUNCIÓN PARA MOSTRAR VOLUNTARIADOS EN LA TABLA

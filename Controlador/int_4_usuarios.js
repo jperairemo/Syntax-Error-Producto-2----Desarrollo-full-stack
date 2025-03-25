@@ -1,4 +1,4 @@
-// controlador/usuariosControlador.js
+// controlador/int_4_usuarios.js
 
 // Importamos la clase Usuario (modelo de datos)
 import { Usuario } from "../Modelo/Usuario.js";
@@ -8,7 +8,7 @@ import {
   obtenerUsuarios,
   guardarUsuario,
   eliminarUsuario
-} from "../Modelo/datos.js";
+} from "../Modelo/almacenaje.js";
 
 // Función que muestra todos los usuarios en la tabla HTML
 function mostrarUsuarios() {
