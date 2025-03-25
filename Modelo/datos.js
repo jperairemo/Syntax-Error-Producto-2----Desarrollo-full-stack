@@ -89,9 +89,19 @@ export function cerrarSesion() {
   localStorage.removeItem(USUARIO_ACTIVO_KEY);
 }
 
+
+
+
+
+
+
+
+
+
 // --------------------------------------------------------------
 // MODELO DE DATOS: VOLUNTARIADOS (IndexedDB - almacenamiento local)
 // --------------------------------------------------------------
+
 
 // -------------------------------
 // CONFIGURACIÓN INICIAL INDEXEDDB
@@ -103,19 +113,89 @@ const NOMBRE_ALMACEN = "voluntariados";     // Nombre del almacén de objetos (s
 
 let db; // Aquí se guarda la conexión abierta con la base de datos
 
-// --------------------------------------------------------------
-// FUNCIONALIDADES QUE SE IMPLEMENTARÁN EN ESTE MÓDULO
-// --------------------------------------------------------------
+// -------------------------------
+// FUNCIÓN PARA INICIALIZAR INDEXEDDB
+// -------------------------------
+export function initDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(NOMBRE_BD, VERSION_BD);
 
-// - initDB(): Inicializa la base de datos y crea el almacén si no existe.
-// - guardarVoluntariado(): Guarda un nuevo voluntariado.
-// - obtenerVoluntariados(): Devuelve todos los voluntariados almacenados.
-// - eliminarVoluntariado(): Borra un voluntariado por ID.
+        // Evento que se ejecuta si la base de datos no existe o es nueva versión
+        request.onupgradeneeded = function (event) {
+            const db = event.target.result;
 
-// La base de datos se llama: 'voluntariadosDB'
-// El almacén de objetos se llama: 'voluntariados'
-// La clave primaria será autoincremental y se llamará 'id'
+            // Si no existe el almacén de objetos, lo creamos
+            if (!db.objectStoreNames.contains(NOMBRE_ALMACEN)) {
+                db.createObjectStore(NOMBRE_ALMACEN, { keyPath: "id" }); // Clave primaria: id
+            }
+        };
 
-// Este módulo representa la parte **Modelo** del patrón MVC.
-// Lo usarán los controladores para acceder y manipular los datos reales
-// desde el navegador, con persistencia a través de IndexedDB.
+        // Si se abre correctamente, guardamos la conexión
+        request.onsuccess = function (event) {
+            db = event.target.result;
+            resolve(true);
+        };
+
+        // Si hay un error, lo rechazamos
+        request.onerror = function (event) {
+            reject("Error al abrir la base de datos: " + event.target.errorCode);
+        };
+    });
+}
+
+// -------------------------------
+// FUNCIÓN PARA GUARDAR UN VOLUNTARIADO
+// -------------------------------
+export function guardarVoluntariado(voluntariado) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([NOMBRE_ALMACEN], "readwrite");
+        const store = transaction.objectStore(NOMBRE_ALMACEN);
+        const request = store.add(voluntariado);
+
+        request.onsuccess = function () {
+            resolve(true); // Éxito al guardar
+        };
+
+        request.onerror = function () {
+            reject("Error al guardar el voluntariado");
+        };
+    });
+}
+
+// -------------------------------
+// FUNCIÓN PARA OBTENER TODOS LOS VOLUNTARIADOS
+// -------------------------------
+export function obtenerVoluntariados() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([NOMBRE_ALMACEN], "readonly");
+        const store = transaction.objectStore(NOMBRE_ALMACEN);
+        const request = store.getAll();
+
+        request.onsuccess = function (event) {
+            resolve(event.target.result); // Retornamos el array de voluntariados
+        };
+
+        request.onerror = function () {
+            reject("Error al obtener voluntariados");
+        };
+    });
+}
+
+// -------------------------------
+// FUNCIÓN PARA ELIMINAR UN VOLUNTARIADO POR ID
+// -------------------------------
+export function eliminarVoluntariado(id) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([NOMBRE_ALMACEN], "readwrite");
+        const store = transaction.objectStore(NOMBRE_ALMACEN);
+        const request = store.delete(id);
+
+        request.onsuccess = function () {
+            resolve(true); // Éxito al eliminar
+        };
+
+        request.onerror = function () {
+            reject("Error al eliminar voluntariado");
+        };
+    });
+}
