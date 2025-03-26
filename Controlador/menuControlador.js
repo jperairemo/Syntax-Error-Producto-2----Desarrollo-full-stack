@@ -19,7 +19,7 @@ function iniciarMenu() {
     if (btnCerrar) {
       btnCerrar.addEventListener("click", () => {
         cerrarSesion(); // Borra el usuario activo del almacenamiento
-        location.href = "login.html"; // Redirige al login
+        location.href = "inicioSesion.html"; // Redirige al login
       });
     }
   } else {

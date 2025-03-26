@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (cerrarSesion) {
             cerrarSesion.addEventListener("click", function () {
                 sessionStorage.removeItem("usuarioLogueado");
-                window.location.href = "login.html"; // Redirigir al login
+                window.location.href = "inicioSesion.html"; // Redirigir al login
             });
         }
 
