@@ -11,12 +11,6 @@ import {
     eliminarVoluntariado
 } from "../Modelo/almacenaje.js";
 
-// Importamos Chart.js desde CDN
-import "https://cdn.jsdelivr.net/npm/chart.js";
-
-// Variable global para almacenar la referencia al gráfico
-let graficoVoluntariados;
-
 // -------------------------------
 // FUNCIÓN PARA MOSTRAR VOLUNTARIADOS EN LA TABLA
 // -------------------------------
@@ -28,7 +22,6 @@ async function mostrarVoluntariados() {
         const voluntariados = await obtenerVoluntariados(); // Obtenemos la lista desde IndexedDB
 
         voluntariados.forEach(voluntariado => {
-            // Creamos una fila por cada voluntariado
             const fila = document.createElement("tr");
             fila.innerHTML = `
                 <td>${voluntariado.titulo}</td>
@@ -41,18 +34,16 @@ async function mostrarVoluntariados() {
             tabla.appendChild(fila);
         });
 
-        // Asignamos eventos a los botones de borrar
         document.querySelectorAll(".borrar-button").forEach(btn => {
             btn.addEventListener("click", async e => {
-                const id = Number(e.target.getAttribute("data-id")); // Obtener ID del voluntariado
-                await eliminarVoluntariado(id); // Eliminar voluntariado en IndexedDB
-                await mostrarVoluntariados(); // Refrescamos la tabla
-                generarGraficoVoluntariados(); // Actualizamos el gráfico
+                const id = Number(e.target.getAttribute("data-id"));
+                await eliminarVoluntariado(id);
+                await mostrarVoluntariados();
+                generarGraficoVoluntariados(); // Actualiza el gráfico
             });
         });
 
-        // Generamos el gráfico con los nuevos datos
-        generarGraficoVoluntariados();
+        generarGraficoVoluntariados(); // Al final, actualizar gráfico
 
     } catch (error) {
         console.error("Error al mostrar voluntariados:", error);
@@ -63,89 +54,147 @@ async function mostrarVoluntariados() {
 // FUNCIÓN PARA DAR DE ALTA UN VOLUNTARIADO
 // -------------------------------
 async function DarAltaVoluntariado(event) {
-    event.preventDefault(); // Evita que se recargue la página
+    event.preventDefault();
 
-    // Capturamos los valores del formulario
     const titulo = document.getElementById("titulo").value;
     const usuario = document.getElementById("usuario").value;
     const fecha = document.getElementById("fecha").value;
     const descripcion = document.getElementById("descripcion").value;
     const tipo = document.getElementById("tipo").value;
 
-    // Creamos un ID único basado en la fecha actual
     const id = new Date().getTime();
-
-    // Creamos un nuevo objeto Voluntariado
     const nuevoVoluntariado = new Voluntariado(id, titulo, usuario, fecha, descripcion, tipo);
 
-    // Guardamos el voluntariado en IndexedDB
     try {
         await guardarVoluntariado(nuevoVoluntariado);
-        await mostrarVoluntariados(); // Refrescamos la tabla con el nuevo voluntariado
-        generarGraficoVoluntariados(); // Actualizamos el gráfico
-        document.getElementById("formVoluntariado").reset(); // Limpiamos el formulario
+        await mostrarVoluntariados();
+        generarGraficoVoluntariados();
+        document.getElementById("formVoluntariado").reset();
     } catch (error) {
         console.error("Error al guardar el voluntariado:", error);
     }
 }
 
 // -------------------------------
-// FUNCIÓN PARA GENERAR EL GRÁFICO DE VOLUNTARIADOS
+// FUNCIÓN PARA GENERAR EL GRÁFICO DE VOLUNTARIADOS POR USUARIO
 // -------------------------------
 async function generarGraficoVoluntariados() {
-    const voluntariados = await obtenerVoluntariados(); // Obtener los voluntariados desde IndexedDB
+    const voluntariados = await obtenerVoluntariados();
 
-    // Contar la cantidad de cada tipo (Petición / Oferta)
-    const conteo = { Petición: 0, Oferta: 0 };
+    const conteoPorUsuario = {};
     voluntariados.forEach(voluntariado => {
-        if (conteo[voluntariado.tipo] !== undefined) {
-            conteo[voluntariado.tipo]++;
+        const usuario = voluntariado.usuario;
+        if (!conteoPorUsuario[usuario]) {
+            conteoPorUsuario[usuario] = { Petición: 0, Oferta: 0 };
         }
+        conteoPorUsuario[usuario][voluntariado.tipo]++;
     });
 
-    // Obtener el contexto del canvas
-    const ctx = document.getElementById("graficoVoluntariados").getContext("2d");
+    const usuarios = Object.keys(conteoPorUsuario);
+    const peticiones = usuarios.map(usuario => conteoPorUsuario[usuario]["Petición"] || 0);
+    const ofertas = usuarios.map(usuario => conteoPorUsuario[usuario]["Oferta"] || 0);
 
-    // Destruir gráfico anterior si existe para evitar errores
-    if (graficoVoluntariados) {
-        graficoVoluntariados.destroy();
+    const canvas = document.getElementById("graficoVoluntariados");
+    const ctx = canvas.getContext("2d");
+
+    // Limpiar gráfico anterior
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Configuración visual
+    const anchoBarra = 30;
+    const espacioEntreGrupos = 40;
+    const espacioEntreBarras = 10;
+    const escala = 30;
+    const alturaMax = 200;
+    const offsetX = 80;
+    const offsetY = canvas.height - 50;
+
+    
+    // Dibujar barras por usuario (primero)
+    
+    usuarios.forEach((usuario, i) => {
+        const xBase = offsetX + i * (anchoBarra * 2 + espacioEntreGrupos) + espacioEntreBarras;
+
+        const alturaPeticion = peticiones[i] * escala;
+        ctx.fillStyle = "#ff6b6b";
+        ctx.fillRect(xBase, offsetY - alturaPeticion, anchoBarra, alturaPeticion);
+
+        const alturaOferta = ofertas[i] * escala;
+        ctx.fillStyle = "#4d96ff";
+        ctx.fillRect(xBase + anchoBarra + espacioEntreBarras, offsetY - alturaOferta, anchoBarra, alturaOferta);
+    });
+
+    
+    // Dibujar ejes encima de las barras
+    
+    ctx.beginPath();
+    ctx.moveTo(offsetX, offsetY);
+    ctx.lineTo(offsetX + usuarios.length * (anchoBarra * 2 + espacioEntreGrupos), offsetY);
+    ctx.moveTo(offsetX, offsetY);
+    ctx.lineTo(offsetX, offsetY - alturaMax - 20);
+    ctx.strokeStyle = "#555";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    
+    // Etiquetas de usuario 
+    
+    usuarios.forEach((usuario, i) => {
+        const xBase = offsetX + i * (anchoBarra * 2 + espacioEntreGrupos) + espacioEntreBarras;
+        const etiquetaX = xBase + anchoBarra + espacioEntreBarras / 2;
+        ctx.fillStyle = "#000";
+        ctx.font = "13px 'Quicksand', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(usuario, etiquetaX, offsetY + 15);
+    });
+
+    
+    // Dibujar valores del eje Y
+    
+    ctx.fillStyle = "#000";
+    ctx.font = "12px Arial";
+    ctx.textAlign = "right";
+    for (let i = 0; i <= alturaMax; i += escala) {
+        const y = offsetY - i;
+        ctx.fillText(i / escala, offsetX - 10, y + 5);
+        ctx.beginPath();
+        ctx.moveTo(offsetX - 5, y);
+        ctx.lineTo(offsetX, y);
+        ctx.stroke();
     }
 
-    // Crear el nuevo gráfico
-    graficoVoluntariados = new Chart(ctx, {
-        type: "pie",
-        data: {
-            labels: ["Petición", "Oferta"],
-            datasets: [{
-                label: "Voluntariados",
-                data: [conteo["Petición"], conteo["Oferta"]],
-                backgroundColor: ["#FF6384", "#36A2EB"],
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: "top"
-                }
-            }
-        }
-    });
+    
+    // Leyenda
+    // 
+    const leyendaX = offsetX + 50;
+    const leyendaY = 20;
+
+    ctx.fillStyle = "#ff6b6b";
+    ctx.fillRect(leyendaX, leyendaY, 12, 12);
+    ctx.fillStyle = "#000";
+    ctx.font = "13px Arial";
+    ctx.textAlign = "left";
+    ctx.fillText("Peticiones", leyendaX + 18, leyendaY + 10);
+
+    ctx.fillStyle = "#4d96ff";
+    ctx.fillRect(leyendaX + 100, leyendaY, 12, 12);
+    ctx.fillStyle = "#000";
+    ctx.fillText("Ofertas", leyendaX + 118, leyendaY + 10);
 }
+
+
 
 // -------------------------------
 // FUNCIÓN PRINCIPAL PARA INICIAR EL CONTROLADOR
 // -------------------------------
 async function iniciarVoluntariados() {
-    await initDB(); // Inicializar IndexedDB antes de cualquier operación
-    await mostrarVoluntariados(); // Cargamos los voluntariados al abrir la vista
+    await initDB();
+    await mostrarVoluntariados();
 
     const form = document.getElementById("formVoluntariado");
     if (form) {
-        form.addEventListener("submit", DarAltaVoluntariado); // Asociamos el evento al botón de alta
+        form.addEventListener("submit", DarAltaVoluntariado);
     }
 }
 
-// Lanzamos el controlador cuando el DOM está listo
 document.addEventListener("DOMContentLoaded", iniciarVoluntariados);
