@@ -60,28 +60,24 @@ export function eliminarUsuario(correo) {
 export function loguearUsuario(correo, password) {
   const usuarios = obtenerUsuarios();
 
-  // Buscamos el usuario con correo y contraseña coincidente
   const usuario = usuarios.find(function (u) {
     return u.correo == correo && u.password == password;
   });
 
   if (usuario != null) {
-    // Guardamos el correo como "usuario activo"
-    localStorage.setItem(USUARIO_ACTIVO_KEY, correo);
+    // 🔄 Guardar el objeto completo (nombre, correo, etc.)
+    localStorage.setItem("usuarioActivo", JSON.stringify(usuario));
     return true;
   } else {
     return false;
   }
 }
 
+
 // Obtener el usuario activo actual
 export function obtenerUsuarioActivo() {
-  const usuario = localStorage.getItem(USUARIO_ACTIVO_KEY);
-  if (usuario != null) {
-    return usuario;
-  } else {
-    return null;
-  }
+  const data = localStorage.getItem("usuarioActivo");
+  return data ? JSON.parse(data) : null;
 }
 
 // Cerrar la sesión

@@ -1,34 +1,59 @@
 // controlador/loginControlador.js
 
 // Importa la función que permite validar el usuario desde el modelo de datos
-import { loguearUsuario } from "../Modelo/almacenaje.js";
+import { loguearUsuario, obtenerUsuarioActivo, cerrarSesion } from "../Modelo/almacenaje.js";
 
 // Función que se ejecuta cuando se envía el formulario de login
 function Loguear(event) {
-  event.preventDefault(); // Evita que el formulario recargue la página
+  event.preventDefault();
 
-  // Obtiene los valores introducidos por el usuario en el formulario
   const correo = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  // Verifica si el usuario existe y la contraseña es correcta
   const ok = loguearUsuario(correo, password);
 
   if (ok) {
-    location.href = "home.html";  // Si el login es correcto, redirige a la página principal
+    alert("Inicio de sesión exitoso"); // ✅ Mostrar alerta
+
+    // Espera un momento antes de redirigir
+    setTimeout(() => {
+      location.href = "home.html";
+    }, 100); // pequeño retraso para que se vea la alerta
   } else {
-    alert("Correo o contraseña incorrectos"); // Muestra error si los datos no coinciden
+    alert("Correo o contraseña incorrectos");
+  }
+}
+
+// Mostrar el usuario activo en el menú
+function mostrarUsuarioActivo() {
+  const navUsuario = document.getElementById("navUsuario");
+  const usuario = obtenerUsuarioActivo();
+
+  if (navUsuario) {
+    if (usuario) {
+      navUsuario.innerHTML = `
+        <span>${usuario}</span>
+        <button id="cerrarSesionBtn" class="btn btn-sm btn-outline-dark ms-2">Cerrar Sesión</button>
+      `;
+      // Evento para cerrar sesión
+      const cerrarBtn = document.getElementById("cerrarSesionBtn");
+      cerrarBtn.addEventListener("click", () => {
+        cerrarSesion();
+        location.reload(); // Recarga la página para reflejar el cierre
+      });
+    } else {
+      navUsuario.innerHTML = `<a href="inicioSesion.html">Login</a>`;
+    }
   }
 }
 
 // Cuando el documento esté completamente cargado
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("formLogin"); // Obtiene el formulario de login
+  const form = document.getElementById("formLogin");
 
-  // Si existe el formulario, asigna el evento de envío al manejador Loguear
   if (form) {
     form.addEventListener("submit", Loguear);
   }
-});
 
-  
+  mostrarUsuarioActivo(); // Llama a la función para mostrar usuario o botón login
+});

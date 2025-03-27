@@ -3,30 +3,36 @@
 // Importamos funciones del modelo para obtener el usuario activo y cerrar sesión
 import { obtenerUsuarioActivo, cerrarSesion } from "../Modelo/almacenaje.js";
 
-// Importamos funciones de la vista para mostrar el menú según si hay login o no
-import { mostrarMenuLogin, mostrarMenuUsuario } from "../Vista/menuVista.js";
+// Función que muestra el nombre del usuario activo o "-no login-"
+function mostrarUsuarioActivo() {
+  const navUsuario = document.getElementById("navUsuario");
+  const usuario = obtenerUsuarioActivo();
 
-// Función que gestiona la lógica del menú según el estado del usuario
-function iniciarMenu() {
-  const usuario = obtenerUsuarioActivo(); // Recupera el usuario activo desde el almacenamiento
-
-  if (usuario) {
-    // Si hay usuario logueado, muestra el menú personalizado
-    mostrarMenuUsuario(usuario);
-
-    // Asigna evento al botón "Cerrar sesión" si existe en el DOM
-    const btnCerrar = document.getElementById("cerrarSesion");
-    if (btnCerrar) {
-      btnCerrar.addEventListener("click", () => {
-        cerrarSesion(); // Borra el usuario activo del almacenamiento
-        location.href = "inicioSesion.html"; // Redirige al login
-      });
+  if (navUsuario) {
+    if (navUsuario) {
+      if (usuario) {
+        navUsuario.innerHTML = `
+          <span>${usuario.nombre.charAt(0).toUpperCase() + usuario.nombre.slice(1)}</span>
+          <button id="cerrarSesion" class="btn btn-sm btn-danger">Cerrar sesión</button>
+        `;
+      }
     }
-  } else {
-    // Si no hay usuario logueado, muestra el menú con opción de login
-    mostrarMenuLogin();
-  }
-}
 
-// Ejecuta la función cuando el DOM esté completamente cargado
-document.addEventListener("DOMContentLoaded", iniciarMenu);
+      const btnCerrar = document.getElementById("cerrarSesion");
+      if (btnCerrar) {
+        btnCerrar.addEventListener("click", () => {
+          cerrarSesion();
+          location.href = "inicioSesion.html";
+        });
+      }
+    } else {
+      navUsuario.innerHTML = `
+          <span class="me-2">-no login-</span>
+          <a href="inicioSesion.html">Login</a>
+      `;
+    }
+  }
+
+
+// ✅ Ejecuta la función cuando se cargue el DOM
+document.addEventListener("DOMContentLoaded", mostrarUsuarioActivo);
