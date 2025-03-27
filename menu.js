@@ -29,5 +29,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (iconoUsuario) {
             iconoUsuario.innerHTML = `<a href="#">${usuario.correo}</a>`;
         }
+        
     }
 });
