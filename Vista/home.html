@@ -8,7 +8,7 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../styles.css"> 
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +23,7 @@
             <div class="nav-item"><a href="voluntariados.html">Voluntarios</a></div>
         </nav>
         <nav class="nav">
-            <div class="nav-item" id="navUsuario"><a href="inicioSesion.html">Login</a></div> <!-- Se agregó el ID -->
+            <div class="nav-item" id="navUsuario"><a href="inicioSesion.html">Login</a></div> <!-- Se agregó el ID (Comentario original) -->
             <div class="nav-item"><a href="#">Register</a></div>
         </nav>
     </header>
@@ -31,7 +31,7 @@
     <div class="container">
         <main class="main text-center py-4">
             <h1 class="dashboard-title">DASHBOARD DE VOLUNTARIADO SOBRE MASCOTAS</h1>
-
+            
             <section class="about-us my-4">
                 <h2 class="mb-3">¿Quiénes somos?</h2>
                 <p class="fs-4">
@@ -41,17 +41,34 @@
             </section>
             
             <section class="volunteering-types my-4">
-                <h2 class="mb-3">Tipos de Voluntariado</h2>
+                <h2 class="mb-3">Ofertas y Peticiones de Voluntariado (Arrastra para seleccionar)</h2>
                 <div id="voluntariadosContainer" class="volunteering-cards g-4">
-                    <!-- Se llenará dinámicamente con home.js -->
+                    <!-- Se llenará dinámicamente con tarjetas arrastrables -->
                 </div>
             </section>  
-        </main>
-    </div>
-    <!-- Vinculación con menu.js -->
+
+            <section id="seleccionVoluntariadosSection" class="my-4">
+                <h2 class="mb-3">Tu Selección (Suelta aquí)</h2> 
+                <div id="seleccionVoluntariadosContainer" class="volunteering-cards g-4"> 
+                    <p>Aquí se mostraría una selección de voluntariados.</p> 
+                </div>
+            </section>
+            
+        </main> 
+
+    </div> 
+
+    <!-- Controlador del Menú -->
     <script type="module" src="../Controlador/menuControlador.js"></script>
+    
+    <!-- NUEVO: Controlador específico para la lógica de Home (incluye Drag & Drop) -->
+    <script type="module" src="../Controlador/int_1_dashboard.js"></script> 
       
-    <!-- Bootstrap JS (Necesario para componentes interactivos) -->
+    <!-- Scripts Externos Requeridos -->
+    <!-- jQuery (Añadido para cumplir requisito, aunque BS5 y el código JS actual no lo usan) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap JS (Ya incluye Popper.js, necesario para componentes interactivos) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

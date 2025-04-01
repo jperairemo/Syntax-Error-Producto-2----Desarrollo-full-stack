@@ -120,6 +120,26 @@ body {
     font-weight: 400;
     color: black;
 }
+
+/* Estilos opcionales para feedback visual de drag & drop */
+.dragging {
+    opacity: 0.8; /* Hacer la tarjeta semitransparente mientras se arrastra */
+    border: 2px dashed #000;
+}
+.drag-over {
+    border: 4px dashed #007bff; /* Resaltar el área de drop */
+    background-color: #e9ecef;
+}
+/* Asegurar que los contenedores tengan una altura mínima si están vacíos */
+#voluntariadosContainer, #seleccionVoluntariadosContainer {
+     min-height: 150px; 
+     padding: 10px; 
+}
+ /* Estilo para el placeholder */
+#seleccionVoluntariadosContainer p:only-child {
+    color: #6c757d;
+    font-style: italic;
+}
 /* ----------------------------------HOME------------------- */
 
 
