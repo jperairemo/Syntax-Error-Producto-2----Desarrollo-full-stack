@@ -6,100 +6,160 @@ const seleccionContainer = document.getElementById("seleccionVoluntariadosContai
 // --- Funciones de Drag and Drop ---
 
 function handleDragStart(event) {
-    // Al empezar a arrastrar, guarda el ID del elemento arrastrado
-    event.dataTransfer.setData("text/plain", event.target.id);
-    event.dataTransfer.effectAllowed = "move";
+  // Al empezar a arrastrar, guarda el ID del elemento arrastrado
+  event.dataTransfer.setData("text/plain", event.target.id);
+  event.dataTransfer.effectAllowed = "move";
 }
 
 function handleDragOver(event) {
-    // Previene el comportamiento por defecto para permitir el drop
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
+  // Previene el comportamiento por defecto para permitir el drop
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "move";
 }
 
 function handleDrop(event) {
-    event.preventDefault();
-    const cardId = event.dataTransfer.getData("text/plain");
-    const draggedElement = document.getElementById(cardId);
+  event.preventDefault();
+  const cardId = event.dataTransfer.getData("text/plain");
+  const draggedElement = document.getElementById(cardId);
 
-    if (draggedElement && event.target === seleccionContainer) {
-        // Mueve el elemento arrastrado al contenedor de selección
-        seleccionContainer.appendChild(draggedElement);
+  if (draggedElement && event.target === seleccionContainer) {
+    seleccionContainer.appendChild(draggedElement);
 
-        // Elimina el texto placeholder si es el primer elemento
-        const placeholder = seleccionContainer.querySelector('p');
-        if (placeholder && seleccionContainer.children.length > 1) { // >1 porque el elemento recién añadido ya cuenta
-             placeholder.remove();
-        }
+    const placeholder = seleccionContainer.querySelector('p');
+    if (placeholder && seleccionContainer.children.length > 1) {
+      placeholder.remove();
     }
+
+    // 🔽 Guardar selección en localStorage
+    const seleccion = JSON.parse(localStorage.getItem("seleccionVoluntariados")) || [];
+    if (!seleccion.includes(cardId)) {
+      seleccion.push(cardId);
+      localStorage.setItem("seleccionVoluntariados", JSON.stringify(seleccion));
+    }
+  }
 }
+
+function handleDropVolverALista(event) {
+  event.preventDefault();
+  const cardId = event.dataTransfer.getData("text/plain");
+  const draggedElement = document.getElementById(cardId);
+
+  if (draggedElement && event.target === voluntariadosContainer) {
+    voluntariadosContainer.appendChild(draggedElement);
+
+    // ✅ Eliminar de localStorage
+    const seleccion = JSON.parse(localStorage.getItem("seleccionVoluntariados")) || [];
+    const nuevaSeleccion = seleccion.filter(id => id !== cardId);
+    localStorage.setItem("seleccionVoluntariados", JSON.stringify(nuevaSeleccion));
+
+    // ✅ Comprobar si quedan más tarjetas en la selección
+    const tarjetasRestantes = Array.from(seleccionContainer.children).filter(
+      el => el.classList.contains("card")
+    );
+
+    if (tarjetasRestantes.length === 0) {
+      // solo si NO queda ninguna tarjeta
+      seleccionContainer.innerHTML = '<p>Aquí se mostraría una selección de voluntariados.</p>';
+    }
+  }
+}
+
+
+
 
 // --- Función para mostrar las tarjetas ---
 
 async function mostrarVoluntariadosHome() {
-    if (!voluntariadosContainer) return; 
+  if (!voluntariadosContainer) return;
 
-    voluntariadosContainer.innerHTML = ""; 
+  voluntariadosContainer.innerHTML = "";
+  seleccionContainer.innerHTML = '<p>Aquí se mostraría una selección de voluntariados.</p>'; // reinicia por defecto
 
-    try {
-        const voluntariados = await obtenerVoluntariados(); 
+  try {
+    const voluntariados = await obtenerVoluntariados();
+    const seleccion = JSON.parse(localStorage.getItem("seleccionVoluntariados")) || [];
 
-        if (voluntariados.length === 0) {
-            voluntariadosContainer.innerHTML = "<p>No hay voluntariados disponibles actualmente.</p>";
-            return;
-        }
-
-        voluntariados.forEach(voluntariado => {
-            const card = document.createElement("div");
-            // Asignar ID único a la tarjeta para poder arrastrarla
-            card.id = `voluntariado-card-${voluntariado.id}`; 
-            card.classList.add("card");
-            // Asignar color según tipo
-            const tipoClase = voluntariado.tipo === "Oferta" ? "card-oferta" : "card-peticion";
-            card.classList.add(tipoClase);
-
-            // ¡Hacer la tarjeta arrastrable!
-            card.draggable = true; 
-
-            card.innerHTML = `
-                <div class="card-image"></div>
-                <h3>${voluntariado.titulo}</h3>
-                <p><strong>Usuario:</strong> ${voluntariado.usuario}</p>
-                <p><strong>Fecha:</strong> ${voluntariado.fecha}</p>
-                <p><strong>Descripción:</strong> ${voluntariado.descripcion}</p>
-                <p class="tipo">${voluntariado.tipo}</p>
-            `;
-
-            // Añadir el listener para iniciar el arrastre
-            card.addEventListener('dragstart', handleDragStart);
-
-            voluntariadosContainer.appendChild(card);
-        });
-
-    } catch (error) {
-        console.error("Error al mostrar voluntariados en Home:", error);
-        voluntariadosContainer.innerHTML = "<p>Error al cargar los voluntariados.</p>";
+    if (voluntariados.length === 0) {
+      voluntariadosContainer.innerHTML = "<p>No hay voluntariados disponibles actualmente.</p>";
+      return;
     }
+
+    console.log("Seleccion guardada:", seleccion);
+
+
+    voluntariados.forEach(voluntariado => {
+      const card = document.createElement("div");
+      const cardId = `voluntariado-card-${voluntariado.id}`;
+      card.id = cardId;
+      card.classList.add("card");
+
+      const tipoClase = voluntariado.tipo === "Oferta" ? "card-oferta" : "card-peticion";
+      card.classList.add(tipoClase);
+      card.draggable = true;
+
+      card.innerHTML = `
+              <div class="card-image"></div>
+              <h3>${voluntariado.titulo}</h3>
+              <p><strong>Usuario:</strong> ${voluntariado.usuario}</p>
+              <p><strong>Fecha:</strong> ${voluntariado.fecha}</p>
+              <p><strong>Descripción:</strong> ${voluntariado.descripcion}</p>
+              <p class="tipo">${voluntariado.tipo}</p>
+          `;
+
+      card.addEventListener('dragstart', handleDragStart);
+
+      // 🔁 Si está en la selección, agregarlo al contenedor correspondiente
+      if (seleccion.includes(cardId)) {
+        if (seleccionContainer.querySelector('p')) {
+          seleccionContainer.querySelector('p').remove(); // quitar placeholder
+        }
+        seleccionContainer.appendChild(card);
+      } else {
+        voluntariadosContainer.appendChild(card);
+      }
+    });
+
+  } catch (error) {
+    console.error("Error al mostrar voluntariados en Home:", error);
+    voluntariadosContainer.innerHTML = "<p>Error al cargar los voluntariados.</p>";
+  }
 }
+
 
 
 // --- Inicialización ---
 
 async function initHome() {
-    try {
-        await initDB(); 
-        await mostrarVoluntariadosHome(); 
+  try {
+    await initDB();
+    await mostrarVoluntariadosHome();
 
-        // Configurar el contenedor de selección como zona de drop
-        if (seleccionContainer) {
-            seleccionContainer.addEventListener('dragover', handleDragOver);
-            seleccionContainer.addEventListener('drop', handleDrop);
-        }
-
-    } catch (error) {
-        console.error("Error inicializando la página Home:", error);
+    // Configurar el contenedor de selección como zona de drop
+    if (seleccionContainer) {
+      seleccionContainer.addEventListener('dragover', handleDragOver);
+      seleccionContainer.addEventListener('drop', handleDrop);
     }
+
+    if (voluntariadosContainer) {
+      voluntariadosContainer.addEventListener('dragover', handleDragOver);
+      voluntariadosContainer.addEventListener('drop', handleDropVolverALista);
+    }
+
+  } catch (error) {
+    console.error("Error inicializando la página Home:", error);
+  }
 }
 
-// Ejecutar al cargar el DOM
-document.addEventListener("DOMContentLoaded", initHome);
+document.addEventListener("DOMContentLoaded", () => {
+  // Ejecutar toda la lógica de inicio
+  initHome();
+
+  // Activar botón para vaciar selección
+  const botonVaciar = document.getElementById("vaciarSeleccion");
+  if (botonVaciar) {
+    botonVaciar.addEventListener("click", () => {
+      localStorage.removeItem("seleccionVoluntariados");
+      location.reload();
+    });
+  }
+});
