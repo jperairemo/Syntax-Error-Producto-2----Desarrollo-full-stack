@@ -39,6 +39,27 @@ function handleDrop(event) {
   }
 }
 
+function handleDropVolverALista(event) {
+  event.preventDefault();
+  const cardId = event.dataTransfer.getData("text/plain");
+  const draggedElement = document.getElementById(cardId);
+
+  if (draggedElement && event.target === voluntariadosContainer) {
+    voluntariadosContainer.appendChild(draggedElement);
+
+    // ✅ Eliminar de localStorage
+    const seleccion = JSON.parse(localStorage.getItem("seleccionVoluntariados")) || [];
+    const nuevaSeleccion = seleccion.filter(id => id !== cardId);
+    localStorage.setItem("seleccionVoluntariados", JSON.stringify(nuevaSeleccion));
+
+    // Si ya no hay tarjetas en la selección, mostrar el placeholder
+    if (seleccionContainer.children.length === 1) { // solo el placeholder o quedó vacío
+      seleccionContainer.innerHTML = '<p>Aquí se mostraría una selección de voluntariados.</p>';
+    }
+  }
+}
+
+
 
 // --- Función para mostrar las tarjetas ---
 
@@ -111,6 +132,11 @@ async function initHome() {
     if (seleccionContainer) {
       seleccionContainer.addEventListener('dragover', handleDragOver);
       seleccionContainer.addEventListener('drop', handleDrop);
+    }
+
+    if (voluntariadosContainer) {
+      voluntariadosContainer.addEventListener('dragover', handleDragOver);
+      voluntariadosContainer.addEventListener('drop', handleDropVolverALista);
     }
 
   } catch (error) {
