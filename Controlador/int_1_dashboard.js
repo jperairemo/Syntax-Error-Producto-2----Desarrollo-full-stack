@@ -52,12 +52,18 @@ function handleDropVolverALista(event) {
     const nuevaSeleccion = seleccion.filter(id => id !== cardId);
     localStorage.setItem("seleccionVoluntariados", JSON.stringify(nuevaSeleccion));
 
-    // Si ya no hay tarjetas en la selección, mostrar el placeholder
-    if (seleccionContainer.children.length === 1) { // solo el placeholder o quedó vacío
+    // ✅ Comprobar si quedan más tarjetas en la selección
+    const tarjetasRestantes = Array.from(seleccionContainer.children).filter(
+      el => el.classList.contains("card")
+    );
+
+    if (tarjetasRestantes.length === 0) {
+      // solo si NO queda ninguna tarjeta
       seleccionContainer.innerHTML = '<p>Aquí se mostraría una selección de voluntariados.</p>';
     }
   }
 }
+
 
 
 
